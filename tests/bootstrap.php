@@ -49,4 +49,4 @@ if ( ! class_exists( 'GFCommon' ) ) {
 }
 
 require_once __DIR__ . '/../includes/class-content-sanitizer.php';
-// require_once __DIR__ . '/../includes/class-content-renderer.php'; // Task 3 uncomments this line.
+require_once __DIR__ . '/../includes/class-content-renderer.php';
