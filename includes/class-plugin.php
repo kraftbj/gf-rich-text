@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-	const VERSION = '1.0.1';
+	const VERSION = '0.1.1';
 
 	/**
 	 * Plugin base URL (with trailing slash).

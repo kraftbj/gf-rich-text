@@ -4,7 +4,7 @@ Tags: gravity forms, rich text, wysiwyg, content, display field
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.1
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,8 +35,8 @@ Features:
 
 == Changelog ==
 
-= 1.0.1 =
+= 0.1.1 =
 * Fixed: the field did not register when Gravity Forms loaded before this plugin (depending on activation order), so the "Rich Text Block" button was missing from the form editor. Hooks are now attached at plugin-load time.
 
-= 1.0.0 =
+= 0.1.0 =
 * Initial release.
