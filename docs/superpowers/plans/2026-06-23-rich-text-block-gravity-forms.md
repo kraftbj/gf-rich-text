@@ -1224,6 +1224,80 @@ git commit -m "docs: add front-end styles, readme, and manual QA checklist"
 
 ---
 
+### Task 8: Distribution zip (`composer zip`)
+
+**Files:**
+- Create: `.gitattributes`
+- Modify: `composer.json` (add a `zip` script), `.gitignore` (ignore the build output)
+
+**Interfaces:**
+- Produces: `composer zip` → writes `build/gf-rich-text.zip`, an upload-ready archive of the plugin containing ONLY runtime files (`gf-rich-text.php`, `includes/`, `assets/`, `readme.txt`, `README.md`), with a top-level `gf-rich-text/` folder prefix. No `vendor/`, `tests/`, `docs/`, `.superpowers/`, dev configs, or the build output itself.
+
+**Rationale:** This is a vanilla PHP/JS/CSS plugin with no runtime Composer dependencies and no asset compilation step, so there is nothing to "build" — only to package. The idiomatic WordPress approach is `git archive` driven by `.gitattributes export-ignore`, which packages the committed tree minus dev-only paths. Because it archives `HEAD`, you must commit before zipping (the script reflects committed state, not the working tree).
+
+- [ ] **Step 1: Create `.gitattributes`**
+
+```
+/.gitattributes   export-ignore
+/.gitignore       export-ignore
+/.wp-env.json     export-ignore
+/composer.json    export-ignore
+/composer.lock    export-ignore
+/phpcs.xml.dist   export-ignore
+/phpunit.xml.dist export-ignore
+/tests            export-ignore
+/docs             export-ignore
+/bin              export-ignore
+```
+
+> `.superpowers/`, `vendor/`, `node_modules/`, `build/`, and the bundled Gravity Forms zip are git-ignored (untracked), so `git archive` already excludes them — they do not need `export-ignore` entries. `readme.txt`, `README.md`, `gf-rich-text.php`, `includes/`, and `assets/` are intentionally NOT ignored, so they ship in the zip.
+
+- [ ] **Step 2: Add the `zip` script to `composer.json`**
+
+In the `scripts` block, add a `zip` entry alongside the existing `lint`/`lint:fix`/`test` scripts:
+
+```json
+    "scripts": {
+        "lint": "phpcs",
+        "lint:fix": "phpcbf",
+        "test": "phpunit",
+        "zip": "mkdir -p build && git archive --format=zip --prefix=gf-rich-text/ -o build/gf-rich-text.zip HEAD && echo \"Wrote build/gf-rich-text.zip\""
+    },
+```
+
+Preserve the existing three scripts exactly; only add the `zip` line (and the trailing comma on the `test` line).
+
+- [ ] **Step 3: Ignore the build output**
+
+Add `/build/` to `.gitignore` (keep the existing entries):
+
+```
+/vendor/
+/node_modules/
+/build/
+.DS_Store
+*.log
+```
+
+- [ ] **Step 4: Verify the zip contents**
+
+Run: `composer zip`
+Expected: prints `Wrote build/gf-rich-text.zip`.
+
+Then run: `unzip -l build/gf-rich-text.zip`
+Expected: the listing contains `gf-rich-text/gf-rich-text.php`, `gf-rich-text/includes/...`, `gf-rich-text/assets/...`, `gf-rich-text/readme.txt`, `gf-rich-text/README.md` — and does NOT contain `tests/`, `docs/`, `vendor/`, `composer.json`, `phpcs.xml.dist`, `phpunit.xml.dist`, or `.gitattributes`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add .gitattributes composer.json .gitignore
+git commit -m "build: add composer zip for upload-ready plugin archive"
+```
+
+> Do not commit `build/gf-rich-text.zip` (it is git-ignored).
+
+---
+
 ## Self-Review Notes (plan author)
 
 **Spec coverage check:**
