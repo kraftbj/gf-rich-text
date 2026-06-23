@@ -43,8 +43,24 @@ class Plugin {
 	}
 
 	/**
-	 * Register hooks. Filled in Task 4.
+	 * Register hooks.
 	 */
 	public function init(): void {
+		add_action( 'gform_loaded', array( $this, 'register_field' ), 5 );
+	}
+
+	/**
+	 * Register the Rich Text Block field with Gravity Forms.
+	 */
+	public function register_field(): void {
+		if ( ! class_exists( 'GF_Fields' ) ) {
+			return;
+		}
+
+		require_once $this->path . 'includes/class-content-renderer.php';
+		require_once $this->path . 'includes/class-content-sanitizer.php';
+		require_once $this->path . 'includes/class-field.php';
+
+		\GF_Fields::register( new Field() );
 	}
 }
