@@ -123,4 +123,20 @@ class Field extends \GF_Field {
 
 		return sprintf( '<div class="gf-rich-text-block">%s</div>', $rendered );
 	}
+
+	/**
+	 * Sanitize field settings when the form is saved.
+	 *
+	 * Mirrors core behavior: authors with the `unfiltered_html` capability keep
+	 * raw markup; everyone else has content run through wp_kses_post().
+	 */
+	public function sanitize_settings() {
+		parent::sanitize_settings();
+
+		$can_unfiltered = function_exists( 'current_user_can' ) && current_user_can( 'unfiltered_html' );
+
+		if ( isset( $this->content ) ) {
+			$this->content = Content_Sanitizer::sanitize( (string) $this->content, (bool) $can_unfiltered );
+		}
+	}
 }
