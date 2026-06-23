@@ -89,9 +89,9 @@ class Plugin {
 				'',
 				'gf_rich_text_block_editor',
 				array(
-					'media_buttons' => true,
+					'media_buttons' => false,
 					'wpautop'       => true,
-					'quicktags'     => true,
+					'quicktags'     => false,
 					'editor_height' => 220,
 					'tinymce'       => array(
 						'toolbar1' => 'formatselect,bold,italic,bullist,numlist,link,alignleft,aligncenter,alignright',
@@ -121,7 +121,6 @@ class Plugin {
 		}
 
 		wp_enqueue_editor();
-		wp_enqueue_media();
 
 		wp_enqueue_script(
 			'gf-rich-text-block-admin',

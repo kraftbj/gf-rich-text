@@ -2,6 +2,33 @@
 	margin: 0 0 1em;
 }
 
+/*
+ * Restore block spacing inside the rendered content. Many block themes reset
+ * paragraph/heading/list margins to 0, which collapses the paragraph breaks an
+ * author created in the editor. Scope the spacing to this field so it does not
+ * affect the rest of the page, and use the class+element specificity to win
+ * over a theme's zero-specificity :where() resets.
+ */
+.gf-rich-text-block p,
+.gf-rich-text-block ul,
+.gf-rich-text-block ol,
+.gf-rich-text-block blockquote,
+.gf-rich-text-block pre,
+.gf-rich-text-block table,
+.gf-rich-text-block h1,
+.gf-rich-text-block h2,
+.gf-rich-text-block h3,
+.gf-rich-text-block h4,
+.gf-rich-text-block h5,
+.gf-rich-text-block h6 {
+	margin: 0 0 1em;
+}
+
+.gf-rich-text-block ul,
+.gf-rich-text-block ol {
+	padding-left: 1.5em;
+}
+
 .gf-rich-text-block :first-child {
 	margin-top: 0;
 }
