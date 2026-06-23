@@ -17,6 +17,19 @@ if ( ! function_exists( 'wp_kses_post' ) ) {
     }
 }
 
+if ( ! function_exists( 'apply_filters' ) ) {
+    /**
+     * Test double: returns the default value unchanged.
+     *
+     * @param string $hook  Hook name.
+     * @param mixed  $value Default value.
+     * @return mixed
+     */
+    function apply_filters( $hook, $value ) {
+        return $value;
+    }
+}
+
 if ( ! function_exists( 'do_shortcode' ) ) {
     /**
      * Test double for shortcode expansion.

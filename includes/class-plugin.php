@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-	const VERSION = '0.1.5';
+	const VERSION = '0.1.6';
 
 	/**
 	 * Position bucket for our setting within the gform_field_standard_settings
@@ -101,8 +101,25 @@ class Plugin {
 					'quicktags'     => false,
 					'editor_height' => 220, // px; comfortable editing height within the GF settings panel.
 					'tinymce'       => array(
-						'toolbar1' => 'formatselect,bold,italic,bullist,numlist,link,alignleft,aligncenter,alignright',
-						'toolbar2' => '',
+						'toolbar1'            => 'formatselect,bold,italic,bullist,numlist,link,alignleft,aligncenter,alignright',
+						'toolbar2'            => '',
+
+						/*
+						 * Show a target dropdown in the link dialog and default new
+						 * links to opening in a new tab. Authors can choose "Same tab"
+						 * per link; the front-end renderer honors the chosen target.
+						 */
+						'default_link_target' => '_blank',
+						'target_list'         => array(
+							array(
+								'title' => 'New tab',
+								'value' => '_blank',
+							),
+							array(
+								'title' => 'Same tab',
+								'value' => '_self',
+							),
+						),
 					),
 				)
 			);

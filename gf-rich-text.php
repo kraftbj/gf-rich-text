@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Rich Text Block for Gravity Forms
  * Description:       Adds a Rich Text Block display field to Gravity Forms for showing formatted content within a form.
- * Version:           0.1.5
+ * Version:           0.1.6
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * License:           GPL-2.0-or-later

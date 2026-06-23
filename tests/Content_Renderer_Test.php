@@ -35,4 +35,31 @@ class Content_Renderer_Test extends TestCase {
 		Content_Renderer::render( 'x', array( 'id' => 1 ), null, false );
 		$this->assertSame( array( false, true, false, 'html' ), \GFCommon::$last_replace_args );
 	}
+
+	public function test_untargeted_link_opens_in_new_tab_when_forced() {
+		$out = Content_Renderer::process_links( '<a href="https://example.com">x</a>', true );
+		$this->assertStringContainsString( 'target="_blank"', $out );
+		$this->assertStringContainsString( 'rel="noopener noreferrer"', $out );
+	}
+
+	public function test_untargeted_link_left_alone_when_not_forced() {
+		$out = Content_Renderer::process_links( '<a href="https://example.com">x</a>', false );
+		$this->assertStringNotContainsString( 'target=', $out );
+	}
+
+	public function test_author_chosen_same_tab_is_respected() {
+		$out = Content_Renderer::process_links( '<a href="https://example.com" target="_self">x</a>', true );
+		$this->assertStringContainsString( 'target="_self"', $out );
+		$this->assertStringNotContainsString( '_blank', $out );
+	}
+
+	public function test_author_chosen_new_tab_gets_security_rel() {
+		$out = Content_Renderer::process_links( '<a target="_blank" href="https://example.com">x</a>', false );
+		$this->assertStringContainsString( 'rel="noopener noreferrer"', $out );
+	}
+
+	public function test_non_link_content_unchanged() {
+		$html = '<p>No links here</p>';
+		$this->assertSame( $html, Content_Renderer::process_links( $html, true ) );
+	}
 }
