@@ -18,8 +18,10 @@ class Content_Renderer_Test extends TestCase {
 	}
 
 	public function test_runs_shortcodes_when_enabled() {
+		// Shortcodes expand first (SC::), then merge tags replace (REPLACED::),
+		// so submitter values cannot inject shortcode syntax that runs afterward.
 		$out = Content_Renderer::render( '[gallery]', array( 'id' => 1 ), null, true );
-		$this->assertSame( 'SC::REPLACED::[gallery]', $out );
+		$this->assertSame( 'REPLACED::SC::[gallery]', $out );
 	}
 
 	public function test_skips_shortcodes_when_disabled() {

@@ -1,8 +1,30 @@
 /* global jQuery, tinymce, GetSelectedField, SetFieldProperty, form */
+
+/*
+ * Drives the TinyMCE editor that lives inside Gravity Forms' single, shared
+ * field-settings panel. Because there is one editor element ('gf_rich_text_block_editor')
+ * reused for every Rich Text Block field, this script swaps each field's content
+ * in and out of that one editor as fields are selected.
+ *
+ * Two structural hazards are handled here:
+ *  1. The panel is hidden at page load, so a TinyMCE instance built then cannot
+ *     take keyboard focus. We fully recreate the editor (mceRemoveEditor +
+ *     mceAddEditor) when a field is selected, so it is built in a visible,
+ *     focusable context.
+ *  2. Content is pushed into the form model only on editor events, so switching
+ *     fields or saving must flush the outgoing field first, and stale/async
+ *     callbacks must not write into the wrong field. A generation token, an
+ *     isLoading guard, and a per-field "loaded id" make those operations safe.
+ */
 ( function( $ ) {
 	'use strict';
 
 	var EDITOR_ID = 'gf_rich_text_block_editor';
+	var MERGE_TAG_SELECT = 'gf_rtb_mergetag_select';
+
+	var loadSeq = 0;          // Bumped on every field selection; discards stale async callbacks.
+	var loadedFieldId = null; // Id of the field whose content the editor currently holds.
+	var isLoading = false;    // True while content is loaded programmatically (suppresses persist).
 
 	function getEditor() {
 		return ( window.tinymce && tinymce.get( EDITOR_ID ) ) || null;
@@ -12,137 +34,162 @@
 		return field && field.type === 'rich_text_block';
 	}
 
-	function loadContent( field ) {
-		var content = field && field.content ? field.content : '';
-		var editor = getEditor();
-		if ( editor ) {
-			editor.setContent( content );
-		} else {
-			$( '#' + EDITOR_ID ).val( content );
-		}
+	function previewFor( fieldId ) {
+		return $( '#field_' + fieldId + ' .gf-rich-text-block--preview' );
 	}
 
-	function updatePreview( html ) {
-		if ( ! window.GetSelectedField ) {
-			return;
-		}
-		var field = GetSelectedField();
-		if ( ! isOurField( field ) ) {
-			return;
-		}
-		$( '#field_' + field.id + ' .gf-rich-text-block--preview' ).html( html || '' );
-	}
-
+	/*
+	 * Write the editor's content to the currently-loaded field. Bound to editor
+	 * events. Bails during a programmatic load and never writes unless the loaded
+	 * field is still the selected field, so a late or teardown event cannot leak
+	 * one field's content into another.
+	 */
 	function persist() {
-		if ( ! window.GetSelectedField ) {
+		if ( isLoading || loadedFieldId === null ) {
 			return;
 		}
-		var field = GetSelectedField();
-		if ( ! isOurField( field ) ) {
+		var selected = window.GetSelectedField ? GetSelectedField() : null;
+		if ( ! selected || ! isOurField( selected ) || String( selected.id ) !== String( loadedFieldId ) ) {
 			return;
 		}
 		var editor = getEditor();
-		var html;
-		/* Bug 2 fix: when the Text tab is active, editor.isHidden() is true
-		 * and the user's edits live in the raw textarea, not in TinyMCE's
-		 * internal state.  Read the textarea in that case. */
-		if ( editor && ! editor.isHidden() ) {
-			html = editor.getContent();
-		} else {
-			html = $( '#' + EDITOR_ID ).val();
+		if ( ! editor || ! editor.initialized ) {
+			return;
 		}
+		var html = editor.getContent();
 		SetFieldProperty( 'content', html );
-		updatePreview( html );
+		previewFor( loadedFieldId ).html( html );
 	}
 
-	function bindEditorEvents() {
+	/*
+	 * Save the currently-loaded field's content to the form model BEFORE the
+	 * editor is torn down or a new field is loaded. Writes by field id (the GF
+	 * selection may have already moved on), so no edits are lost on field switch
+	 * or save.
+	 */
+	function flush() {
+		if ( loadedFieldId === null || typeof form === 'undefined' || ! form.fields ) {
+			return;
+		}
 		var editor = getEditor();
-		/* Bug 1 fix: use a per-instance property instead of a module-level
-		 * flag so that a freshly re-initialized TinyMCE instance (e.g. after
-		 * the media modal closes) gets re-bound automatically. */
+		if ( ! editor || ! editor.initialized ) {
+			return;
+		}
+		var html = editor.getContent();
+		for ( var i = 0; i < form.fields.length; i++ ) {
+			if ( String( form.fields[ i ].id ) === String( loadedFieldId ) ) {
+				form.fields[ i ].content = html;
+				previewFor( loadedFieldId ).html( html );
+				return;
+			}
+		}
+	}
+
+	function bindEditor( editor ) {
 		if ( ! editor || editor._gfRtbBound ) {
 			return;
 		}
 		editor._gfRtbBound = true;
-		editor.on( 'change keyup SetContent ExecCommand', persist );
+		// 'blur' flushes content when focus leaves the editor (e.g. clicking Save Form).
+		editor.on( 'change keyup SetContent blur', persist );
+	}
+
+	function unbindEditor( editor ) {
+		if ( editor && editor._gfRtbBound ) {
+			editor.off( 'change keyup SetContent blur', persist );
+			editor._gfRtbBound = false;
+		}
+	}
+
+	/*
+	 * Recreate the editor in the now-visible panel, then run cb(editor) once the
+	 * fresh instance is ready. mceAddEditor can resolve asynchronously, so we wait
+	 * on the EditorManager 'AddEditor' event instead of reading tinymce.get()
+	 * inline (which can return null immediately after the command).
+	 */
+	function recreateEditor( cb ) {
+		if ( ! window.tinymce ) {
+			return;
+		}
+		var existing = tinymce.get( EDITOR_ID );
+		if ( existing ) {
+			unbindEditor( existing );
+			tinymce.execCommand( 'mceRemoveEditor', false, EDITOR_ID );
+		}
+		var onAdd = function( e ) {
+			if ( ! e.editor || e.editor.id !== EDITOR_ID ) {
+				return;
+			}
+			tinymce.off( 'AddEditor', onAdd );
+			if ( e.editor.initialized ) {
+				cb( e.editor );
+			} else {
+				e.editor.on( 'init', function() {
+					cb( e.editor );
+				} );
+			}
+		};
+		tinymce.on( 'AddEditor', onAdd );
+		tinymce.execCommand( 'mceAddEditor', false, EDITOR_ID );
 	}
 
 	function populateMergeTags() {
-		var $select = $( '#gf_rtb_mergetag_select' );
+		var $select = $( '#' + MERGE_TAG_SELECT );
 		if ( ! $select.length || typeof form === 'undefined' || ! form.fields ) {
 			return;
 		}
 		// Keep the placeholder option; rebuild the rest from the current form.
 		$select.find( 'option:gt(0)' ).remove();
 		form.fields.forEach( function( f ) {
-			if ( f.type === 'rich_text_block' || ! f.label ) {
+			// Skip our own fields and labels that would produce a malformed merge tag.
+			if ( f.type === 'rich_text_block' || ! f.label || /[{}:]/.test( f.label ) ) {
 				return;
 			}
 			$select.append(
-				$( '<option></option>' )
-					.val( '{' + f.label + ':' + f.id + '}' )
-					.text( f.label )
+				$( '<option></option>' ).val( '{' + f.label + ':' + f.id + '}' ).text( f.label )
 			);
 		} );
 	}
 
 	function insertMergeTag( tag ) {
-		if ( ! tag ) {
-			return;
-		}
 		var editor = getEditor();
-		if ( editor ) {
+		if ( tag && editor && editor.initialized ) {
 			editor.insertContent( tag );
-		} else {
-			var $ta = $( '#' + EDITOR_ID );
-			$ta.val( ( $ta.val() || '' ) + tag );
-		}
-		persist();
-	}
-
-	/* wp_editor() is rendered inside Gravity Forms' field-settings panel, which
-	 * is hidden at page load. A TinyMCE instance built inside a hidden container
-	 * initializes in a broken state: it reports ready but its iframe cannot take
-	 * keyboard focus, so the user cannot type. Merely switching tabs does not fix
-	 * this. When our field's panel becomes visible, destroy any existing instance
-	 * and recreate it so the iframe is built in a focusable, visible context, then
-	 * run cb once the fresh instance has initialized. */
-	function ensureEditor( cb ) {
-		if ( ! window.tinymce ) {
-			cb();
-			return;
-		}
-		if ( tinymce.get( EDITOR_ID ) ) {
-			tinymce.execCommand( 'mceRemoveEditor', false, EDITOR_ID );
-		}
-		tinymce.execCommand( 'mceAddEditor', false, EDITOR_ID );
-		var editor = getEditor();
-		if ( editor && ! editor.initialized ) {
-			editor.on( 'init', cb );
-		} else {
-			cb();
+			persist();
 		}
 	}
 
 	$( document ).on( 'gform_load_field_settings', function( event, field ) {
+		// Flush whatever was being edited before anything tears the editor down.
+		flush();
+
 		if ( ! isOurField( field ) ) {
+			loadedFieldId = null;
 			return;
 		}
-		ensureEditor( function() {
-			loadContent( field );
-			bindEditorEvents();
-		} );
+
+		var mySeq = ++loadSeq;
+		var fieldId = field.id;
+		var content = field.content ? field.content : '';
+
 		populateMergeTags();
+
+		recreateEditor( function( editor ) {
+			// A newer selection superseded this one; discard this callback.
+			if ( mySeq !== loadSeq ) {
+				return;
+			}
+			loadedFieldId = fieldId;
+			isLoading = true;
+			editor.setContent( content );
+			isLoading = false;
+			previewFor( fieldId ).html( content );
+			bindEditor( editor );
+		} );
 	} );
 
-	$( document ).on( 'change', '#gf_rtb_mergetag_select', function() {
+	$( document ).on( 'change', '#' + MERGE_TAG_SELECT, function() {
 		insertMergeTag( $( this ).val() );
 		$( this ).val( '' );
 	} );
-
-	/* Bug 2 fix: persist Text-tab edits live.  When the Text tab is active
-	 * TinyMCE is hidden and the user edits the raw textarea directly, so the
-	 * TinyMCE change/keyup events never fire.  Delegated binding survives
-	 * panel re-rendering the same way the merge-tag handler does. */
-	$( document ).on( 'input keyup', '#' + EDITOR_ID, persist );
 } )( jQuery );

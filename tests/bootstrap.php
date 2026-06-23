@@ -35,14 +35,19 @@ if ( ! class_exists( 'GFCommon' ) ) {
      */
     class GFCommon {
         /**
-         * Stub replacement that marks the text.
+         * Stub replacement that marks the text. Accepts the full GF argument
+         * list so callers passing explicit url_encode/esc_html/nl2br/format work.
          *
-         * @param string $text   Text.
-         * @param array  $form   Form.
-         * @param mixed  $entry  Entry.
+         * @param string $text       Text.
+         * @param array  $form       Form.
+         * @param mixed  $entry      Entry.
+         * @param bool   $url_encode URL-encode flag.
+         * @param bool   $esc_html   Escape-HTML flag.
+         * @param bool   $nl2br      nl2br flag.
+         * @param string $format     Output format.
          * @return string
          */
-        public static function replace_variables( $text, $form = array(), $entry = null ) {
+        public static function replace_variables( $text, $form = array(), $entry = null, $url_encode = false, $esc_html = true, $nl2br = true, $format = 'html' ) {
             return 'REPLACED::' . $text;
         }
     }

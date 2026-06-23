@@ -16,7 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-	const VERSION = '0.1.3';
+	const VERSION = '0.1.4';
+
+	/**
+	 * Position bucket for our setting within the gform_field_standard_settings
+	 * panel. Used both as the action priority and as the render guard, so the two
+	 * stay in sync via a single source of truth.
+	 */
+	const SETTING_POSITION = 25;
 
 	/**
 	 * Plugin base URL (with trailing slash).
@@ -56,7 +63,7 @@ class Plugin {
 		} else {
 			add_action( 'gform_loaded', array( $this, 'register_field' ), 5 );
 		}
-		add_action( 'gform_field_standard_settings', array( $this, 'render_rich_content_setting' ), 25, 2 );
+		add_action( 'gform_field_standard_settings', array( $this, 'render_rich_content_setting' ), self::SETTING_POSITION, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'gform_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ), 10, 2 );
 	}
@@ -73,10 +80,10 @@ class Plugin {
 		/*
 		 * gform_field_standard_settings fires once per position bucket; render our
 		 * setting only in the bucket matching the priority this action is hooked at
-		 * (25, see init()). Keep the two numbers in sync. Multiple plugins can share
-		 * a position without conflict, since each emits its own <li>.
+		 * (see init()). Multiple plugins can share a position without conflict,
+		 * since each emits its own <li>.
 		 */
-		if ( 25 !== $position ) {
+		if ( self::SETTING_POSITION !== $position ) {
 			return;
 		}
 		?>
@@ -92,7 +99,7 @@ class Plugin {
 					'media_buttons' => false,
 					'wpautop'       => true,
 					'quicktags'     => false,
-					'editor_height' => 220,
+					'editor_height' => 220, // px; comfortable editing height within the GF settings panel.
 					'tinymce'       => array(
 						'toolbar1' => 'formatselect,bold,italic,bullist,numlist,link,alignleft,aligncenter,alignright',
 						'toolbar2' => '',

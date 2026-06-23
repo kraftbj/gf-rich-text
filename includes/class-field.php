@@ -81,7 +81,6 @@ class Field extends \GF_Field {
 		return array(
 			'label_setting',
 			'rich_content_setting',
-			'description_setting',
 			'css_class_setting',
 			'conditional_logic_field_setting',
 		);

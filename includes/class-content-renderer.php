@@ -22,12 +22,21 @@ class Content_Renderer {
 	 * @return string Processed inner HTML.
 	 */
 	public static function render( string $content, array $form, $entry, bool $run_shortcodes ): string {
-		$content = \GFCommon::replace_variables( $content, $form, $entry );
-
+		/*
+		 * Expand shortcodes first, from the trusted authored template, so that
+		 * submitter-supplied merge-tag values cannot inject executable shortcode
+		 * syntax that runs after replacement.
+		 */
 		if ( $run_shortcodes ) {
 			$content = do_shortcode( $content );
 		}
 
-		return $content;
+		/*
+		 * Replace merge tags with explicit arguments: url_encode=false,
+		 * esc_html=true (so submitter-supplied field values are HTML-escaped
+		 * while the authored markup is preserved), nl2br=false (authored HTML is
+		 * already structured; nl2br would inject spurious <br> tags), format=html.
+		 */
+		return \GFCommon::replace_variables( $content, $form, $entry, false, true, false, 'html' );
 	}
 }
