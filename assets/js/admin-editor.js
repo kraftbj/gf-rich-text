@@ -101,23 +101,22 @@
 	}
 
 	/* wp_editor() is rendered inside Gravity Forms' field-settings panel, which
-	 * is hidden at page load, so TinyMCE never auto-initializes and the editor
-	 * is stuck in an uneditable Text-mode state. When our field's panel becomes
-	 * visible, switch to the Visual tab to initialize TinyMCE, then run cb once
-	 * the instance is ready. If an initialized TinyMCE instance already exists
-	 * (including when the user is deliberately on the Text tab), leave it alone. */
+	 * is hidden at page load. A TinyMCE instance built inside a hidden container
+	 * initializes in a broken state: it reports ready but its iframe cannot take
+	 * keyboard focus, so the user cannot type. Merely switching tabs does not fix
+	 * this. When our field's panel becomes visible, destroy any existing instance
+	 * and recreate it so the iframe is built in a focusable, visible context, then
+	 * run cb once the fresh instance has initialized. */
 	function ensureEditor( cb ) {
-		var editor = getEditor();
-		if ( editor && editor.initialized ) {
+		if ( ! window.tinymce ) {
 			cb();
 			return;
 		}
-		if ( window.tinymce && window.switchEditors ) {
-			try {
-				switchEditors.go( EDITOR_ID, 'tmce' );
-			} catch ( e ) {}
+		if ( tinymce.get( EDITOR_ID ) ) {
+			tinymce.execCommand( 'mceRemoveEditor', false, EDITOR_ID );
 		}
-		editor = getEditor();
+		tinymce.execCommand( 'mceAddEditor', false, EDITOR_ID );
+		var editor = getEditor();
 		if ( editor && ! editor.initialized ) {
 			editor.on( 'init', cb );
 		} else {
