@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-	const VERSION = '1.0.0';
+	const VERSION = '1.0.1';
 
 	/**
 	 * Plugin base URL (with trailing slash).
@@ -46,7 +46,16 @@ class Plugin {
 	 * Register hooks.
 	 */
 	public function init(): void {
-		add_action( 'gform_loaded', array( $this, 'register_field' ), 5 );
+		/*
+		 * If Gravity Forms already fired gform_loaded before this runs (load
+		 * order depends on activation order), register the field now; otherwise
+		 * wait for the action.
+		 */
+		if ( did_action( 'gform_loaded' ) ) {
+			$this->register_field();
+		} else {
+			add_action( 'gform_loaded', array( $this, 'register_field' ), 5 );
+		}
 		add_action( 'gform_field_standard_settings', array( $this, 'render_rich_content_setting' ), 25, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'gform_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ), 10, 2 );
