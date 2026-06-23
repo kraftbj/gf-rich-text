@@ -165,7 +165,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-    const VERSION = '1.0.0';
+    const VERSION = '0.1.0';
 
     /**
      * Plugin base URL (with trailing slash).
@@ -206,7 +206,7 @@ class Plugin {
 /**
  * Plugin Name:       Rich Text Block for Gravity Forms
  * Description:       Adds a Rich Text Block display field to Gravity Forms for showing formatted content within a form.
- * Version:           1.0.0
+ * Version:           0.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * License:           GPL-2.0-or-later
@@ -1094,7 +1094,7 @@ Tags: gravity forms, rich text, wysiwyg, content, display field
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 0.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -1125,7 +1125,7 @@ Features:
 
 == Changelog ==
 
-= 1.0.0 =
+= 0.1.0 =
 * Initial release.
 ```
 
