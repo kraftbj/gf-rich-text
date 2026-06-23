@@ -14,7 +14,8 @@
     "scripts": {
         "lint": "phpcs",
         "lint:fix": "phpcbf",
-        "test": "phpunit"
+        "test": "phpunit",
+        "zip": "mkdir -p build && git archive --format=zip --prefix=gf-rich-text/ -o build/gf-rich-text.zip HEAD && echo \"Wrote build/gf-rich-text.zip\""
     },
     "config": {
         "allow-plugins": {
