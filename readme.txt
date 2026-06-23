@@ -4,7 +4,7 @@ Tags: gravity forms, rich text, wysiwyg, content, display field
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Features:
 3. Add a "Rich Text Block" field to any form from the Standard Fields group.
 
 == Changelog ==
+
+= 0.1.2 =
+* Fixed: the Rich Content editor was not editable because TinyMCE did not initialize inside the (hidden) field settings panel. It now initializes when the field is selected.
 
 = 0.1.1 =
 * Fixed: the field did not register when Gravity Forms loaded before this plugin (depending on activation order), so the "Rich Text Block" button was missing from the form editor. Hooks are now attached at plugin-load time.

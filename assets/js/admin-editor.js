@@ -100,12 +100,39 @@
 		persist();
 	}
 
+	/* wp_editor() is rendered inside Gravity Forms' field-settings panel, which
+	 * is hidden at page load, so TinyMCE never auto-initializes and the editor
+	 * is stuck in an uneditable Text-mode state. When our field's panel becomes
+	 * visible, switch to the Visual tab to initialize TinyMCE, then run cb once
+	 * the instance is ready. If an initialized TinyMCE instance already exists
+	 * (including when the user is deliberately on the Text tab), leave it alone. */
+	function ensureEditor( cb ) {
+		var editor = getEditor();
+		if ( editor && editor.initialized ) {
+			cb();
+			return;
+		}
+		if ( window.tinymce && window.switchEditors ) {
+			try {
+				switchEditors.go( EDITOR_ID, 'tmce' );
+			} catch ( e ) {}
+		}
+		editor = getEditor();
+		if ( editor && ! editor.initialized ) {
+			editor.on( 'init', cb );
+		} else {
+			cb();
+		}
+	}
+
 	$( document ).on( 'gform_load_field_settings', function( event, field ) {
 		if ( ! isOurField( field ) ) {
 			return;
 		}
-		loadContent( field );
-		bindEditorEvents();
+		ensureEditor( function() {
+			loadContent( field );
+			bindEditorEvents();
+		} );
 		populateMergeTags();
 	} );
 
