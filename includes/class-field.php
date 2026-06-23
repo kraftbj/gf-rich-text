@@ -128,7 +128,14 @@ class Field extends \GF_Field {
 	 * Sanitize field settings when the form is saved.
 	 *
 	 * Mirrors core behavior: authors with the `unfiltered_html` capability keep
-	 * raw markup; everyone else has content run through wp_kses_post().
+	 * raw markup; everyone else has content run through wp_kses_post(). This is
+	 * the same security posture as Gravity Forms' own HTML field.
+	 *
+	 * Gravity Forms invokes this via GFFormsModel::sanitize_settings() on the
+	 * form-editor save path, which is the only route a user reaches through the
+	 * UI. Programmatic routes (GFAPI::add_form(), form import) do not run this
+	 * and store content as given, but both require the `gravityforms_edit_forms`
+	 * capability, so they are already privileged operations.
 	 */
 	public function sanitize_settings() {
 		parent::sanitize_settings();

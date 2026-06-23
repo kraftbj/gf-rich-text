@@ -61,6 +61,12 @@ class Plugin {
 	public function render_rich_content_setting( $position, $form_id ): void {
 		unset( $form_id );
 
+		/*
+		 * gform_field_standard_settings fires once per position bucket; render our
+		 * setting only in the bucket matching the priority this action is hooked at
+		 * (25, see init()). Keep the two numbers in sync. Multiple plugins can share
+		 * a position without conflict, since each emits its own <li>.
+		 */
 		if ( 25 !== $position ) {
 			return;
 		}
