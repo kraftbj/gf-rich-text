@@ -1,5 +1,7 @@
 /vendor/
 /node_modules/
 /build/
+/.wp-env/
 .DS_Store
 *.log
+.gstack/
