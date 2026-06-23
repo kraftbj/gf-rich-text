@@ -3,7 +3,6 @@
 	'use strict';
 
 	var EDITOR_ID = 'gf_rich_text_block_editor';
-	var bound = false;
 
 	function getEditor() {
 		return ( window.tinymce && tinymce.get( EDITOR_ID ) ) || null;
@@ -43,17 +42,28 @@
 			return;
 		}
 		var editor = getEditor();
-		var html = editor ? editor.getContent() : $( '#' + EDITOR_ID ).val();
+		var html;
+		/* Bug 2 fix: when the Text tab is active, editor.isHidden() is true
+		 * and the user's edits live in the raw textarea, not in TinyMCE's
+		 * internal state.  Read the textarea in that case. */
+		if ( editor && ! editor.isHidden() ) {
+			html = editor.getContent();
+		} else {
+			html = $( '#' + EDITOR_ID ).val();
+		}
 		SetFieldProperty( 'content', html );
 		updatePreview( html );
 	}
 
 	function bindEditorEvents() {
 		var editor = getEditor();
-		if ( ! editor || bound ) {
+		/* Bug 1 fix: use a per-instance property instead of a module-level
+		 * flag so that a freshly re-initialized TinyMCE instance (e.g. after
+		 * the media modal closes) gets re-bound automatically. */
+		if ( ! editor || editor._gfRtbBound ) {
 			return;
 		}
-		bound = true;
+		editor._gfRtbBound = true;
 		editor.on( 'change keyup SetContent ExecCommand', persist );
 	}
 
@@ -103,4 +113,10 @@
 		insertMergeTag( $( this ).val() );
 		$( this ).val( '' );
 	} );
+
+	/* Bug 2 fix: persist Text-tab edits live.  When the Text tab is active
+	 * TinyMCE is hidden and the user edits the raw textarea directly, so the
+	 * TinyMCE change/keyup events never fire.  Delegated binding survives
+	 * panel re-rendering the same way the merge-tag handler does. */
+	$( document ).on( 'input keyup', '#' + EDITOR_ID, persist );
 } )( jQuery );
