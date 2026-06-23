@@ -63,7 +63,7 @@ docs/QA-CHECKLIST.md                      manual QA checklist (GF-integration pa
     "require-dev": {
         "automattic/jetpack-codesniffer": "^8.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "phpunit/phpunit": "^9.6"
+        "phpunit/phpunit": "^12.0"
     },
     "scripts": {
         "lint": "phpcs",
@@ -360,9 +360,6 @@ namespace GF_Rich_Text_Block\Tests;
 use GF_Rich_Text_Block\Content_Sanitizer;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \GF_Rich_Text_Block\Content_Sanitizer
- */
 class Content_Sanitizer_Test extends TestCase {
 
     public function test_returns_raw_when_user_can_use_unfiltered_html() {
@@ -383,46 +380,7 @@ Expected: FAIL — `Error: Class "GF_Rich_Text_Block\Content_Sanitizer" not foun
 
 - [ ] **Step 4: Implement `includes/class-content-sanitizer.php`**
 
-```php
-<?php
-/**
- * Save-time content sanitization.
- *
- * @package GF_Rich_Text_Block
- */
-
-namespace GF_Rich_Text_Block;
-
-if ( ! defined( 'ABSPATH' ) && ! defined( 'GF_RICH_TEXT_BLOCK_TESTING' ) ) {
-    // Allow loading under PHPUnit where ABSPATH is undefined.
-    if ( ! function_exists( 'wp_kses_post' ) ) {
-        return;
-    }
-}
-
-/**
- * Sanitizes authored rich-text content based on the author's capability.
- */
-class Content_Sanitizer {
-
-    /**
-     * Sanitize content for storage.
-     *
-     * @param string $content                  Raw authored HTML.
-     * @param bool   $can_use_unfiltered_html  Whether the author may store unfiltered HTML.
-     * @return string Sanitized content.
-     */
-    public static function sanitize( string $content, bool $can_use_unfiltered_html ): string {
-        if ( $can_use_unfiltered_html ) {
-            return $content;
-        }
-
-        return wp_kses_post( $content );
-    }
-}
-```
-
-> The ABSPATH guard above is awkward; simpler is to drop the guard entirely since the class only defines a method and calls `wp_kses_post` lazily. Use this simpler header instead:
+No ABSPATH guard is needed: the class only defines a method and calls `wp_kses_post()` lazily, so it loads cleanly under both WordPress and PHPUnit.
 
 ```php
 <?php
@@ -494,9 +452,6 @@ namespace GF_Rich_Text_Block\Tests;
 use GF_Rich_Text_Block\Content_Renderer;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \GF_Rich_Text_Block\Content_Renderer
- */
 class Content_Renderer_Test extends TestCase {
 
     public function test_replaces_merge_tags() {
