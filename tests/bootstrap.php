@@ -35,6 +35,14 @@ if ( ! class_exists( 'GFCommon' ) ) {
      */
     class GFCommon {
         /**
+         * Records the [url_encode, esc_html, nl2br, format] of the last call so
+         * tests can assert the renderer passes safe explicit arguments.
+         *
+         * @var array
+         */
+        public static $last_replace_args = array();
+
+        /**
          * Stub replacement that marks the text. Accepts the full GF argument
          * list so callers passing explicit url_encode/esc_html/nl2br/format work.
          *
@@ -48,6 +56,7 @@ if ( ! class_exists( 'GFCommon' ) ) {
          * @return string
          */
         public static function replace_variables( $text, $form = array(), $entry = null, $url_encode = false, $esc_html = true, $nl2br = true, $format = 'html' ) {
+            self::$last_replace_args = array( $url_encode, $esc_html, $nl2br, $format );
             return 'REPLACED::' . $text;
         }
     }

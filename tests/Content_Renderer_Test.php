@@ -28,4 +28,11 @@ class Content_Renderer_Test extends TestCase {
 		$out = Content_Renderer::render( '[gallery]', array( 'id' => 1 ), null, false );
 		$this->assertSame( 'REPLACED::[gallery]', $out );
 	}
+
+	public function test_replace_variables_called_with_safe_arguments() {
+		// Locks the security/formatting contract: url_encode=false, esc_html=true
+		// (escape submitter values), nl2br=false (no spurious <br>), format=html.
+		Content_Renderer::render( 'x', array( 'id' => 1 ), null, false );
+		$this->assertSame( array( false, true, false, 'html' ), \GFCommon::$last_replace_args );
+	}
 }

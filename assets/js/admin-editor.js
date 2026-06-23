@@ -25,6 +25,7 @@
 	var loadSeq = 0;          // Bumped on every field selection; discards stale async callbacks.
 	var loadedFieldId = null; // Id of the field whose content the editor currently holds.
 	var isLoading = false;    // True while content is loaded programmatically (suppresses persist).
+	var pendingAddHandler = null; // The in-flight EditorManager 'AddEditor' listener, if any.
 
 	function getEditor() {
 		return ( window.tinymce && tinymce.get( EDITOR_ID ) ) || null;
@@ -111,6 +112,12 @@
 		if ( ! window.tinymce ) {
 			return;
 		}
+		// Drop any listener from a superseded selection so they cannot accumulate
+		// on the EditorManager when fields are switched rapidly.
+		if ( pendingAddHandler ) {
+			tinymce.off( 'AddEditor', pendingAddHandler );
+			pendingAddHandler = null;
+		}
 		var existing = tinymce.get( EDITOR_ID );
 		if ( existing ) {
 			unbindEditor( existing );
@@ -121,6 +128,7 @@
 				return;
 			}
 			tinymce.off( 'AddEditor', onAdd );
+			pendingAddHandler = null;
 			if ( e.editor.initialized ) {
 				cb( e.editor );
 			} else {
@@ -129,6 +137,7 @@
 				} );
 			}
 		};
+		pendingAddHandler = onAdd;
 		tinymce.on( 'AddEditor', onAdd );
 		tinymce.execCommand( 'mceAddEditor', false, EDITOR_ID );
 	}
