@@ -4,7 +4,7 @@ Tags: gravity forms, rich text, wysiwyg, content, display field
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Features:
 3. Add a "Rich Text Block" field to any form from the Standard Fields group.
 
 == Changelog ==
+
+= 0.1.5 =
+* Hardened rapid field-switching in the form editor (prevents TinyMCE listener accumulation) and locked the safe merge-tag rendering arguments with a test.
 
 = 0.1.4 =
 * Added: a toolbox icon for the field.

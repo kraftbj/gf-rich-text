@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Plugin {
 
-	const VERSION = '0.1.4';
+	const VERSION = '0.1.5';
 
 	/**
 	 * Position bucket for our setting within the gform_field_standard_settings
