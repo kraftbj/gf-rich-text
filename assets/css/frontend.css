@@ -1,0 +1,16 @@
+.gf-rich-text-block {
+	margin: 0 0 1em;
+}
+
+.gf-rich-text-block :first-child {
+	margin-top: 0;
+}
+
+.gf-rich-text-block :last-child {
+	margin-bottom: 0;
+}
+
+.gf-rich-text-block img {
+	max-width: 100%;
+	height: auto;
+}
