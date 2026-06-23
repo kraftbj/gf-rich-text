@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<ruleset name="GF Rich Text Block">
+    <description>Coding standards for Rich Text Block for Gravity Forms.</description>
+
+    <file>.</file>
+
+    <exclude-pattern>/vendor/*</exclude-pattern>
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+    <exclude-pattern>/tests/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg value="ps"/>
+    <arg name="parallel" value="8"/>
+
+    <rule ref="Jetpack"/>
+
+    <config name="testVersion" value="8.0-"/>
+    <config name="minimum_supported_wp_version" value="6.4"/>
+
+    <rule ref="Jetpack.Functions.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="gf-rich-text"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="gf-rich-text"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="gf_rich_text_block"/>
+                <element value="GF_Rich_Text_Block"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
