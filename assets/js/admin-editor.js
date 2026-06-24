@@ -95,6 +95,24 @@
 		editor.on( 'change keyup SetContent blur', persist );
 	}
 
+	/*
+	 * Route the link button to WordPress's centered link modal (which has a
+	 * reliable "Open link in a new tab" option) instead of the inline link
+	 * toolbar, which gets clipped off-screen inside GF's narrow settings panel.
+	 * Called from the recreate callback (after init), so it overrides the command
+	 * WordPress's wplink plugin registers; both command names are covered.
+	 */
+	function useLinkModal( editor ) {
+		if ( ! window.wpLink ) {
+			return;
+		}
+		var openLinkModal = function() {
+			wpLink.open( editor.id );
+		};
+		editor.addCommand( 'WP_Link', openLinkModal );
+		editor.addCommand( 'mceLink', openLinkModal );
+	}
+
 	function unbindEditor( editor ) {
 		if ( editor && editor._gfRtbBound ) {
 			editor.off( 'change keyup SetContent blur', persist );
@@ -194,6 +212,7 @@
 			isLoading = false;
 			previewFor( fieldId ).html( content );
 			bindEditor( editor );
+			useLinkModal( editor );
 		} );
 	} );
 

@@ -4,7 +4,7 @@ Tags: gravity forms, rich text, wysiwyg, content, display field
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.1.6
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Features:
 3. Add a "Rich Text Block" field to any form from the Standard Fields group.
 
 == Changelog ==
+
+= 0.2.0 =
+* Fixed: the link dialog opens WordPress's centered link modal (with a reliable "Open link in a new tab" option) instead of the inline link toolbar, which was clipped off-screen inside the field settings panel.
 
 = 0.1.6 =
 * Added: links can now open in a new tab. The editor link dialog has a target dropdown (new tab by default), and content links without a chosen target open in a new tab (filterable via gf_rich_text_block_links_new_tab), with rel="noopener noreferrer" added for security.
