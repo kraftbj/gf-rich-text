@@ -40,12 +40,13 @@ class Content_Renderer {
 		$content = \GFCommon::replace_variables( $content, $form, $entry, false, true, false, 'html' );
 
 		/*
-		 * Process links: respect the target an author chose in the editor, default
-		 * links with no target to a new tab (filterable -- for content inside a
-		 * form, a new tab keeps a link click from losing the visitor's progress),
-		 * and always add rel="noopener noreferrer" to new-tab links for security.
+		 * Process links: respect the target the author chose in the editor (the
+		 * link dialog defaults new links to a new tab, and authors can opt out per
+		 * link), and always add rel="noopener noreferrer" to new-tab links for
+		 * security. A site can force every untargeted link to a new tab by
+		 * returning true from this filter.
 		 */
-		$force_new_tab = (bool) apply_filters( 'gf_rich_text_block_links_new_tab', true );
+		$force_new_tab = (bool) apply_filters( 'gf_rich_text_block_links_new_tab', false );
 
 		return self::process_links( $content, $force_new_tab );
 	}

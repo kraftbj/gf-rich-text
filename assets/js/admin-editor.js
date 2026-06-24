@@ -108,6 +108,19 @@
 		}
 		var openLinkModal = function() {
 			wpLink.open( editor.id );
+			/*
+			 * Default the "Open link in a new tab" checkbox to checked for NEW
+			 * links (an empty URL field means no existing link is being edited).
+			 * Existing links keep whatever target they already have. Authors can
+			 * uncheck it to open in the same tab.
+			 */
+			setTimeout( function() {
+				var url = document.getElementById( 'wp-link-url' );
+				var target = document.getElementById( 'wp-link-target' );
+				if ( target && url && ! url.value ) {
+					target.checked = true;
+				}
+			}, 0 );
 		};
 		editor.addCommand( 'WP_Link', openLinkModal );
 		editor.addCommand( 'mceLink', openLinkModal );
