@@ -4,7 +4,7 @@ Tags: gravity forms, rich text, wysiwyg, content, display field
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Features:
 3. Add a "Rich Text Block" field to any form from the Standard Fields group.
 
 == Changelog ==
+
+= 0.2.2 =
+* Restore list bullets/numbers and link underlines inside the field, which some block themes strip globally. Lists and links now look the same on the front end and in the editor preview.
 
 = 0.2.1 =
 * The link dialog now defaults new links to "Open link in a new tab" (checkbox pre-checked); uncheck it to open in the same tab. Links honor the chosen target.

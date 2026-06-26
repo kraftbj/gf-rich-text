@@ -29,6 +29,34 @@
 	padding-left: 1.5em;
 }
 
+/*
+ * Restore list markers and link underlines. Block themes commonly set
+ * ul, ol { list-style: none; } and a { text-decoration: none; } globally,
+ * which strips the bullets, numbers, and underlines an author created in the
+ * editor. Scope the restoration to this field (with sensible nested-list
+ * markers) and rely on the same class+element specificity used above to win
+ * over a theme's zero-specificity :where() resets.
+ */
+.gf-rich-text-block ul {
+	list-style: disc;
+}
+
+.gf-rich-text-block ol {
+	list-style: decimal;
+}
+
+.gf-rich-text-block ul ul {
+	list-style: circle;
+}
+
+.gf-rich-text-block ul ul ul {
+	list-style: square;
+}
+
+.gf-rich-text-block a {
+	text-decoration: underline;
+}
+
 .gf-rich-text-block :first-child {
 	margin-top: 0;
 }

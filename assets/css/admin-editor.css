@@ -5,6 +5,33 @@
 	background: #fff;
 }
 
+/*
+ * Restore list markers and link underlines in the live preview so it matches
+ * the front end. The admin can also strip ul, ol { list-style: none; } and
+ * a { text-decoration: none; }; scope the restoration to this field (with
+ * sensible nested-list markers) and rely on class+element specificity rather
+ * than !important. Mirrors the same rules in frontend.css.
+ */
+.gf-rich-text-block ul {
+	list-style: disc;
+}
+
+.gf-rich-text-block ol {
+	list-style: decimal;
+}
+
+.gf-rich-text-block ul ul {
+	list-style: circle;
+}
+
+.gf-rich-text-block ul ul ul {
+	list-style: square;
+}
+
+.gf-rich-text-block a {
+	text-decoration: underline;
+}
+
 .gf-rtb-mergetags {
 	margin-top: 8px;
 }
